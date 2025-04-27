@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+    <!-- ... existing styles ... -->
+</head>
+<body>
+    <div class="login-container">
+        <h2>Login</h2>
+        <div class="form-group">
+            <input type="text" id="username" placeholder="Username">
+        </div>
+        <div class="form-group">
+            <input type="password" id="password" placeholder="Password">
+        </div>
+        <button onclick="login()">Login</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        // Check if we were redirected from logout
+        window.onload = function() {
+            // Clear any remaining client-side storage
+            localStorage.clear();
+            sessionStorage.clear();
+        };
+
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username: username,
+                    password: password
+                }),
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.token) {
+                    document.getElementById('result').innerHTML = 'Login successful! Redirecting...';
+                    window.location.href = '/dashboard';
+                } else {
+                    document.getElementById('result').innerHTML = 'Login failed: ' + data.message;
+                }
+            })
+            .catch(error => {
+                document.getElementById('result').innerHTML = 'Error: ' + error;
+            });
+        }
+    </script>
+</body>
+</html>
