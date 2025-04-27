@@ -24,12 +24,11 @@ Steps for Execution:
 1. All Programs should be correctly Structure in desired Folders & Templates.
 2. Open Docker Desktop
 3. In CMD, cmd: docker compose up --build (Command will help to build Coinatiner & Image in Docker Desktop) 
-   The Applicate will be hosted on Webpage http://localhost:5000
 4. Docker will also provide the hosts, you can directly click on the hosts to go to the login portal.
 
 
 Webpage
-1. Login Screen (HTML)
+1. Login Screen (HTML) - Temaplates Files in /templates folder
 User needs to enter UserName & Password
 System will Vaildate based on JWT Method Auth
 Output:
