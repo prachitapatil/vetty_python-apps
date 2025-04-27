@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cryptocurrency Dashboard</title>
+    <style>
+        /* ... (keep existing styles) ... */
+        .logout-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .logout-btn:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Cryptocurrency Dashboard</h1>
+            <button class="logout-btn" onclick="handleLogout()">Logout</button>
+        </div>
+        
+        <div class="controls">
+            <select id="currency" onchange="loadCoins()">
+                <option value="usd">USD</option>
+                <option value="eur">EUR</option>
+                <option value="gbp">GBP</option>
+            </select>
+            <select id="perPage" onchange="loadCoins()">
+                <option value="10">10 per page</option>
+                <option value="25">25 per page</option>
+                <option value="50">50 per page</option>
+            </select>
+        </div>
+
+        <div id="loading" class="loading" style="display: none;">Loading...</div>
+        <div id="error" class="error" style="display: none;"></div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Name</th>
+                    <th>Symbol</th>
+                    <th>Price</th>
+                    <th>Market Cap</th>
+                    <th>24h Change</th>
+                </tr>
+            </thead>
+            <tbody id="coinsTable">
+            </tbody>
+        </table>
+
+        <div class="pagination">
+            <button onclick="previousPage()">Previous</button>
+            <span id="pageInfo">Page 1</span>
+            <button onclick="nextPage()">Next</button>
+        </div>
+    </div>
+
+    <script>
+        // Add this function for logout handling
+        function handleLogout() {
+            fetch('/logout', {
+                method: 'GET',
+                credentials: 'same-origin'
+            })
+            .then(response => {
+                if (response.ok || response.status === 401) {
+                    // Clear any client-side storage
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    
+                    // Redirect to login page
+                    window.location.href = '/login';
+                } else {
+                    console.error('Logout failed');
+                }
+            })
+            .catch(error => {
+                console.error('Error during logout:', error);
+                // Fallback: redirect to login page even if there's an error
+                window.location.href = '/login';
+            });
+        }
+        let currentPage = 1;
+
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('error').style.display = 'none';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        function showError(message) {
+            document.getElementById('error').style.display = 'block';
+            document.getElementById('error').textContent = message;
+        }
+
+        function loadCoins() {
+    showLoading();
+    const currency = document.getElementById('currency').value;
+    const perPage = document.getElementById('perPage').value;
+    
+    fetch(`/coins?page=${currentPage}&per_page=${perPage}&currency=${currency}`, {
+        method: 'GET',
+        credentials: 'same-origin',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => {
+        if (response.status === 401) {
+            window.location.href = '/login';
+            throw new Error('Unauthorized');
+        }
+        return response.json();
+    })
+    .then(data => {
+        hideLoading();
+        if (!data || !data.coins) {
+            showError('No data available');
+            return;
+        }
+        
+        // Show warning if using sample data
+        if (data.note) {
+            showError(data.note);
+        }
+        
+        const tbody = document.getElementById('coinsTable');
+        tbody.innerHTML = '';
+        
+        data.coins.forEach(coin => {
+            const row = `
+                <tr>
+                    <td>${coin.market_cap_rank || 'N/A'}</td>
+                    <td>${coin.name}</td>
+                    <td>${coin.symbol}</td>
+                    <td>${formatPrice(coin.current_price, currency)}</td>
+                    <td>${formatMarketCap(coin.market_cap, currency)}</td>
+                    <td style="color: ${coin.price_change_24h >= 0 ? 'green' : 'red'}">
+                        ${coin.price_change_24h ? coin.price_change_24h.toFixed(2) + '%' : 'N/A'}
+                    </td>
+                </tr>
+            `;
+            tbody.innerHTML += row;
+        });
+        
+        document.getElementById('pageInfo').textContent = `Page ${currentPage}`;
+    })
+    .catch(error => {
+        hideLoading();
+        showError(`Error: ${error.message}`);
+        console.error('Error:', error);
+    });
+}
+
+        function formatPrice(price, currency) {
+            if (price === null || price === undefined) return 'N/A';
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: currency.toUpperCase(),
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 6
+            }).format(price);
+        }
+
+        function formatMarketCap(marketCap, currency) {
+            if (marketCap === null || marketCap === undefined) return 'N/A';
+            const billion = 1000000000;
+            const million = 1000000;
+            if (marketCap >= billion) {
+                return `${(marketCap / billion).toFixed(2)}B ${currency.toUpperCase()}`;
+            }
+            return `${(marketCap / million).toFixed(2)}M ${currency.toUpperCase()}`;
+        }
+
+        function previousPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                loadCoins();
+            }
+        }
+
+        function nextPage() {
+            currentPage++;
+            loadCoins();
+        }
+
+        // Load initial data when page loads
+        document.addEventListener('DOMContentLoaded', loadCoins);
+    </script>
+</body>
+</html>
