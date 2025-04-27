@@ -1,0 +1,18 @@
+services:
+  python-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: python-app
+    restart: unless-stopped
+    init: true
+    ports:
+      - "5000:5000"  # Expose Flask app
+    # env_file: ./.env  # Uncomment if .env file exists
+    # No external dependencies required (see README)
+    # No volumes needed as there is no database or persistent storage
+    # The app will be available at http://localhost:5000
+
+# No external services (database, cache, etc.) detected in README or code
+# No volumes section needed as there is no persistent data
+# No networks section needed as there is only one service

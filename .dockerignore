@@ -1,0 +1,82 @@
+# Python cache and bytecode
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+
+# Test directories and files
+test/
+tests/
+
+# Development and IDE artifacts
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Build and distribution outputs
+dist/
+build/
+out/
+tmp/
+temp/
+*.tmp
+
+# Version control
+.git/
+.gitignore
+.svn/
+.hg/
+
+# Environment and secrets
+.env*
+*.env
+*.pem
+*.key
+*.crt
+config.local.*
+*.local.yml
+
+# Documentation and markdown
+README*
+*.md
+docs/
+
+# Docker and Compose files
+Dockerfile*
+docker-compose*
+
+# Backup and temporary files
+*.bak
+
+# Project-specific: local development
+.local/
+local/
+
+# Logs and debug
+*.log
+debug/
+
+# Miscellaneous (files with no extension)
+*
+!*/
+!*.py
+!*.yml
+!*.yaml
+!*.txt
+
+# Exclude requirements.txt (needed for builds)
+!requirements.txt
+
+# Exclude run.py (entrypoint)
+!run.py
+
+# Exclude app directory and its Python files
+!app/
+!app/*.py
+
+# Exclude tests if you want to run tests in container (comment out if not needed)
+#!tests/
+#!tests/*.py
